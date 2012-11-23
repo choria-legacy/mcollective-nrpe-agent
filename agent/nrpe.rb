@@ -1,29 +1,11 @@
 module MCollective
   module Agent
     class Nrpe<RPC::Agent
-      metadata    :name        => "nrpe",
-                  :description => "Agent to query NRPE commands via MCollective",
-                  :author      => "R.I.Pienaar",
-                  :license     => "Apache 2",
-                  :version     => "2.1",
-                  :url         => "http://projects.puppetlabs.com/projects/mcollective-plugins/wiki",
-                  :timeout     => 5
 
       action "runcommand" do
         validate :command, :shellsafe
 
-        command = plugin_for_command(request[:command])
-
-        if command == nil
-          reply[:output] = "No such command: #{request[:command]}" if command == nil
-          reply[:exitcode] = 3
-
-          reply.fail "UNKNOWN"
-
-          return
-        end
-
-        reply[:exitcode] = run(command[:cmd], :stdout => :output, :chomp => true)
+        reply[:exitcode], reply[:output] = Nrpe.run(request[:command])
 
         case reply[:exitcode]
         when 0
@@ -48,10 +30,34 @@ module MCollective
         end
       end
 
+      # Runs an Nrpe command and returns the command output and exitcode
+      # If the command does not exist run will return exitcode 3.
+      #
+      # The Nrpe configuration directory and file containing checks
+      # must be specified in server.cfg
+      #
+      # Example :
+      #          plugin.nrpe.conf_dir = /etc/nagios/nrpe
+      #          plugin.nrpe.conf_file = checks.nrpe
+
+      def self.run(command)
+        nrpe_command = Nrpe.plugin_for_command(command)
+
+        return 3, "No such command: #{command}" unless nrpe_command
+
+        output = ""
+        shell = Shell.new(nrpe_command[:cmd], {:stdout => output, :chomp => true})
+        shell.runcommand
+        exitcode = shell.status.exitstatus
+
+        return exitcode, output
+      end
+
       private
-      def plugin_for_command(req)
+      def self.plugin_for_command(command)
         ret = nil
         fname = nil
+        config = Config.instance
 
         fdir  = config.pluginconf["nrpe.conf_dir"] || "/etc/nagios/nrpe.d"
 
@@ -66,7 +72,7 @@ module MCollective
           t.each do |check|
             check.chomp!
 
-            if check =~ /command\[#{request[:command]}\]=(.+)$/
+            if check =~ /command\[#{command}\]=(.+)$/
               ret = {:cmd => $1}
             end
           end

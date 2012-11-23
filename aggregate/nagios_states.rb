@@ -13,13 +13,14 @@ module MCollective
         @aggregate_format = "%10s : %s" unless @aggregate_format
       end
 
-      # Determines the average of a set of numerical values
+      # Increments the correct field in the result hash based
+      # on the result of the nrpe command.
       def process_result(value, reply)
         if value
           status = @status_map[value]
           @result[:value][status] += 1
         else
-          @result["UNKNOWN"] += 1
+          @result[:value]["UNKNOWN"] += 1
         end
       end
     end
