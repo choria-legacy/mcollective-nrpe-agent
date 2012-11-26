@@ -39,7 +39,6 @@ module MCollective
       # Example :
       #          plugin.nrpe.conf_dir = /etc/nagios/nrpe
       #          plugin.nrpe.conf_file = checks.nrpe
-
       def self.run(command)
         nrpe_command = Nrpe.plugin_for_command(command)
 
@@ -53,7 +52,6 @@ module MCollective
         return exitcode, output
       end
 
-      private
       def self.plugin_for_command(command)
         ret = nil
         fname = nil

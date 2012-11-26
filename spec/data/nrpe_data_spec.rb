@@ -19,6 +19,13 @@ module MCollective
         plugin.query_data("test_command")
         plugin.result.exitcode.should == 0
       end
+
+      it "should return unknown if the command cannot be found" do
+        MCollective::Agent::Nrpe.expects(:plugin_for_command).returns(nil)
+        plugin = Nrpe_data.new
+        plugin.query_data("test_command")
+        plugin.result.exitcode.should == 3
+      end
     end
   end
 end

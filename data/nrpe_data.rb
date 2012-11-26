@@ -6,10 +6,16 @@ module MCollective
       activate_when{ PluginManager["nrpe_agent"]}
 
       query do |command|
-        nrpe_command = Agent::Nrpe.plugin_for_command(command)[:cmd]
+        nrpe_command = Agent::Nrpe.plugin_for_command(command)
 
-        Log.debug("Running Nrpe command '#{command}' : '#{nrpe_command}'")
-        result[:exitcode], _ = Agent::Nrpe.run(command)
+        if nrpe_command
+          nrpe_command = nrpe_command[:cmd]
+          Log.debug("Running Nrpe command '#{command}' : '#{nrpe_command}'")
+          result[:exitcode], _ = Agent::Nrpe.run(command)
+        else
+          Log.warn("No Nrpe command '#{command}' found. Returning status UNKNOWN")
+          result[:exitcode] = 3
+        end
       end
     end
   end
