@@ -34,20 +34,13 @@ module MCollective
           {:data => {:exitcode => 1}, :statuscode => 0, :sender => 'rspec5', :statusmsg => 'ok'}]
         end
 
-        let(:rpcclient){mock}
+        let(:rpcclient) { mock }
 
         before do
           @app.expects(:rpcclient).returns(rpcclient)
+          @app.configuration[:command] = "rspec"
           rpcclient.stubs(:stats).returns({:noresponsefrom => ['rspec']})
-          @app.expects(:printrpcstats)
-          @app.expects(:printf).with("%-40s status=%s\n", 'rspec2', 'ok')
-          @app.expects(:printf).with("%-40s status=%s\n", 'rspec3', 'ok')
-          @app.expects(:printf).with("%-40s status=%s\n", 'rspec4', 'ok')
-          @app.expects(:printf).with("%-40s status=%s\n", 'rspec5', 'ok')
-          @app.expects(:printf).with("              OK: %d\n", 1)
-          @app.expects(:printf).with("         WARNING: %d\n", 2)
-          @app.expects(:printf).with("        CRITICAL: %d\n", 1)
-          @app.expects(:printf).with("         UNKNOWN: %d\n", 2)
+          @app.expects(:printrpcstats).with(:summarize => true, :caption => "rspec NRPE results")
         end
 
         it 'should run the command and output the results if verbose is set' do

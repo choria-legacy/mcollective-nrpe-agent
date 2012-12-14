@@ -3,23 +3,20 @@ module MCollective
     class Nrpe<RPC::Agent
 
       action "runcommand" do
-        validate :command, :shellsafe
-
         reply[:exitcode], reply[:output] = Nrpe.run(request[:command])
 
         case reply[:exitcode]
-        when 0
-          reply.statusmsg = "OK"
+          when 0
+            reply.statusmsg = "OK"
 
-        when 1
-          reply.fail "WARNING"
+          when 1
+            reply.fail "WARNING"
 
-        when 2
-          reply.fail "CRITICAL"
+          when 2
+            reply.fail "CRITICAL"
 
-        else
-          reply.fail "UNKNOWN"
-
+          else
+            reply.fail "UNKNOWN"
         end
 
         if reply[:output] =~ /^(.+)\|(.+)$/
@@ -62,12 +59,11 @@ module MCollective
         if config.pluginconf["nrpe.conf_file"]
           fname = "#{fdir}/#{config.pluginconf['nrpe.conf_file']}"
         else
-          fname = "#{fdir}/#{req}.cfg"
+          fname = "#{fdir}/#{command}.cfg"
         end
 
         if File.exist?(fname)
-          t = File.readlines(fname)
-          t.each do |check|
+          File.readlines(fname).each do |check|
             check.chomp!
 
             if check =~ /command\[#{command}\]=(.+)$/
@@ -81,4 +77,3 @@ module MCollective
     end
   end
 end
-# vi:tabstop=2:expandtab:ai

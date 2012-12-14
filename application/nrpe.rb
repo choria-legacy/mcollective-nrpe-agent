@@ -13,24 +13,13 @@ class MCollective::Application::Nrpe<MCollective::Application
   def main
     nrpe = rpcclient("nrpe")
 
-    stats = [0, 0, 0, 0]
-    statuscodes = [0]
-
     nrpe_results = nrpe.runcommand(:command => configuration[:command])
-
-    puts
 
     nrpe_results.each do |result|
       if result[:statuscode] == 0
-        exitcode = result[:data][:exitcode].to_i
-        statuscodes << exitcode
+        exitcode = Integer(result[:data][:exitcode]) rescue 3
       else
         exitcode = 1
-        statuscodes << 1
-      end
-
-      if exitcode >=0 and exitcode < 4
-        stats[exitcode] += 1
       end
 
       if nrpe.verbose
@@ -44,20 +33,6 @@ class MCollective::Application::Nrpe<MCollective::Application
       end
     end
 
-    puts
-
-    # Nodes that don't respond are UNKNOWNs
-    if nrpe.stats[:noresponsefrom].size > 0
-      stats[3] += nrpe.stats[:noresponsefrom].size
-      statuscodes << 3
-    end
-
-    printrpcstats :caption => "#{configuration[:command]} NRPE results"
-
-    printf("\nNagios Statusses:\n") if nrpe.verbose
-    printf("              OK: %d\n", stats[0])
-    printf("         WARNING: %d\n", stats[1])
-    printf("        CRITICAL: %d\n", stats[2])
-    printf("         UNKNOWN: %d\n", stats[3])
+    printrpcstats :summarize => true, :caption => "%s NRPE results" % configuration[:command]
   end
 end

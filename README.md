@@ -35,79 +35,86 @@ You can set the directory where the NRPE cfg files live using plugin.nrpe.conf_d
 You can use the normal mco rpc script to run the agent:
 
 ```
-mco rpc nrpe runcommand command=check_load
-Determining the amount of hosts matching filter for 2 seconds .... 43
+% mco rpc nrpe runcommand command=check_load
+Discovering hosts using the mongo method .... 27
 
- * [ ============================================================> ] 43 / 43
+ * [ ============================================================> ] 27 / 27
 
- Finished processing 43 hosts in 415.22 ms
+
+dev1.example.com                             Request Aborted
+   UNKNOWN
+          Exit Code: 3
+             Output: No such command: check_load
+   Performance Data:
+
+
+Summary of Exit Code:
+
+           OK : 26
+      UNKNOWN : 1
+      WARNING : 0
+     CRITICAL : 0
+
+
+Finished processing 27 / 27 hosts in 380.57 ms
 ```
 
 ###Supplied Client
 Or we provide a client specifically for this agent that is a bit more appropriate for the purpose:
-The client supports:
+
+The client by default only shows problems:
 
 ```
 % mco nrpe -W /dev_server/ check_load
 
- * [ ============================================================> ] 3 / 3
+ * [ ============================================================> ] 19 / 19
+
+dev1.example.com                           status=UNKNOWN
+    No such command: check_load
+
+Summary of Exit Code:
+
+           OK : 18
+      UNKNOWN : 1
+      WARNING : 0
+     CRITICAL : 0
 
 
-Finished processing 3 hosts in 329.93 ms
-
-              OK: 3
-         WARNING: 0
-        CRITICAL: 0
-         UNKNOWN: 0
-```
-
-By default it only shows the problems:
-```
-% mco nrpe check_disks
-
- * [ ============================================================> ] 43 / 43
-
-your.box.net                      status=CRITICAL
-
-Finished processing 43 hosts in 439.98 ms
-
-              OK: 42
-         WARNING: 0
-        CRITICAL: 1
-         UNKNOWN: 0
+Finished processing 19 / 19 hosts in 216.59 ms
 ```
 
 To see all the statusses:
 
 ```
 % mco nrpe -W /dev_server/ check_load -v
-Determining the amount of hosts matching filter for 2 seconds .... 3
+Discovering hosts using the mongo method .... 3
 
- * [ ============================================================> ] 3 / 3
+ * [ ============================================================> ] 6 / 6
 
-dev1.your.net                      status=OK
+dev1.example.com                           status=UNKNOWN
+    No such command: check_load
+
+dev9.example.com                           status=OK
     OK - load average: 0.00, 0.00, 0.00
 
-dev2.your.net                      status=OK
+dev7.example.com                           status=OK
     OK - load average: 0.00, 0.00, 0.00
 
-dev3.your.net                      status=OK
-    OK - load average: 0.00, 0.00, 0.00
+Summary of Exit Code:
+
+           OK : 2
+      UNKNOWN : 1
+     CRITICAL : 0
+      WARNING : 0
 
 
 ---- check_load NRPE results ----
-           Nodes: 3
-     Pass / Fail: 3 / 0
-      Start Time: Tue Dec 29 22:24:10 +0000 2009
-  Discovery Time: 2006.46ms
-      Agent Time: 334.85ms
-      Total Time: 2341.31ms
-
-Nagios Statusses:
-              OK: 3
-         WARNING: 0
-        CRITICAL: 0
-         UNKNOWN: 0
+           Nodes: 3 / 3
+     Pass / Fail: 2 / 1
+      Start Time: Fri Dec 14 11:21:58 +0000 2012
+  Discovery Time: 50.86ms
+      Agent Time: 212.90ms
+      Total Time: 263.76ms
 ```
 
 ###Data Plugin
@@ -115,11 +122,15 @@ Nagios Statusses:
 The NRPE Agent ships with a data plugin that will enable you to filter discovery on the results of NRPE commands.
 
 ```
-mco rpc rpcutil ping -S "Nrpe('check_disk1').exitcode=0"
-Determining the amount of hosts matching filter for 2 seconds .... 43
+%  mco rpc rpcutil ping -S "Nrpe('check_disk1').exitcode=0"
+Discovering hosts using the mc method for 3 second(s) .... 1
 
- * [ ============================================================> ] 43 / 43
+ * [ ============================================================> ] 1 / 1
 
- Finished processing 43 hosts in 415.22 ms
 
+dev2.example.com
+   Timestamp: 1355484245
+
+
+Finished processing 1 / 1 hosts in 138.15 ms
 ```

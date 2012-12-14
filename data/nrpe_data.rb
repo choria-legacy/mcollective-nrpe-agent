@@ -3,7 +3,7 @@ module MCollective
     class Nrpe_data<Base
 
       # Only activate Nrpe data plugin if agent plugin has been loaded
-      activate_when{ PluginManager["nrpe_agent"]}
+      activate_when{ PluginManager["nrpe_agent"] }
 
       query do |command|
         nrpe_command = Agent::Nrpe.plugin_for_command(command)
@@ -20,4 +20,3 @@ module MCollective
     end
   end
 end
-# vi:tabstop=2:expandtab:ai

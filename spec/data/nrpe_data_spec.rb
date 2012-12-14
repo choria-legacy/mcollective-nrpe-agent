@@ -1,4 +1,5 @@
 #!/usr/bin/env rspec
+
 require 'spec_helper'
 require File.join(File.dirname(__FILE__), "../../", "data", "nrpe_data")
 require File.join(File.dirname(__FILE__), "../../", "agent", "nrpe")
