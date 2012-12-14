@@ -4,6 +4,7 @@ module MCollective
 
       action "runcommand" do
         reply[:exitcode], reply[:output] = Nrpe.run(request[:command])
+        reply[:command] = request[:command]
 
         case reply[:exitcode]
           when 0

@@ -2,7 +2,7 @@ metadata  :name         => "nrpe",
           :description  => "Checks the exit codes of executed Nrpe commands",
           :author       => "P Loubser",
           :license      => "ASL 2.0",
-          :version      => "3.0.0",
+          :version      => "3.0.1",
           :url          => "http://projects.puppetlabs.com/projects/mcollective-plugins/wiki",
           :timeout      => 4
 
