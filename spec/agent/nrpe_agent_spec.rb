@@ -71,7 +71,7 @@ describe "nrpe agent" do
       shell = mock
       status = mock
 
-      MCollective::Agent::Nrpe.expects(:plugin_for_command).with("foo").returns("foo")
+      MCollective::Agent::Nrpe.expects(:plugin_for_command).with("foo").returns({:cmd => "foo"})
       MCollective::Shell.stubs(:new).returns(shell)
       shell.expects(:runcommand)
       shell.expects(:status).returns(status)

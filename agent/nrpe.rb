@@ -55,7 +55,7 @@ module MCollective
         fname = nil
         config = Config.instance
 
-        fdir  = config.pluginconf["nrpe.conf_dir"] || "/etc/nagios/nrpe.d"
+        fdir = config.pluginconf["nrpe.conf_dir"] || "/etc/nagios/nrpe.d"
 
         if config.pluginconf["nrpe.conf_file"]
           fname = "#{fdir}/#{config.pluginconf['nrpe.conf_file']}"
