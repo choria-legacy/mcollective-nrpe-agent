@@ -38,7 +38,7 @@ def build_package(path)
 
     options << "--dependency=\"#{buildops["dependencies"].join(" ")}\"" if buildops["dependencies"]
 
-    safe_system("ruby -I #{File.join(ENV["MCLIBDIR"], "lib")} #{File.join(ENV["MCBINDIR"], "mco")} plugin package -v #{path} #{options.join(" ")}")
+    safe_system("ruby -I #{File.join(ENV["MCLIBDIR"], "lib").shellescape} #{File.join(ENV["MCBINDIR"], "mco").shellescape} plugin package -v #{path.shellescape} #{options.join(" ")}")
     move_artifacts
   end
 end
@@ -81,7 +81,8 @@ if defined?(RSpec::Core::RakeTask)
       t.pattern = 'spec/**/*_spec.rb'
     end
 
-    t.rspec_opts = $LOAD_PATH.join(" -I ") + " " + File.read("#{specdir}/spec.opts").chomp
+    tmp_load_path = $LOAD_PATH.map { |f| f.shellescape }.join(" -I ")
+    t.rspec_opts = tmp_load_path + " " + File.read("#{specdir}/spec.opts").chomp
   end
 end
 
