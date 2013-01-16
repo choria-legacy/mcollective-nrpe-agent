@@ -67,7 +67,7 @@ module MCollective
           File.readlines(fname).each do |check|
             check.chomp!
 
-            if check =~ /command\[#{command}\]=(.+)$/
+            if check =~ /command\[#{command}\]\s*=\s*(.+)$/
               ret = {:cmd => $1}
             end
           end
