@@ -2,7 +2,7 @@ metadata    :name        => "nrpe",
             :description => "Agent to query NRPE commands via MCollective",
             :author      => "R.I.Pienaar",
             :license     => "ASL 2.0",
-            :version     => "3.0.1",
+            :version     => "3.0.2",
             :url         => "http://projects.puppetlabs.com/projects/mcollective-plugins/wiki",
             :timeout     => 5
 
