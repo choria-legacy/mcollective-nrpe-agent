@@ -2,6 +2,20 @@ module MCollective
   module Agent
     class Nrpe<RPC::Agent
 
+      action "runallcommands" do
+        reply[:commands] = {}
+        p = Nrpe.all_command_plugins
+        p.each do |name,cmd|
+          output = ""
+          exitcode, output = Nrpe.run(name)
+
+          reply[:commands][name] = {
+            :exitcode=>exitcode,
+            :output=> output
+          }
+        end
+      end
+
       action "runcommand" do
         reply[:exitcode], reply[:output] = Nrpe.run(request[:command])
         reply[:command] = request[:command]
@@ -43,38 +57,49 @@ module MCollective
         return 3, "No such command: #{command}" unless nrpe_command
 
         output = ""
-        shell = Shell.new(nrpe_command[:cmd], {:stdout => output, :chomp => true})
+        shell = Shell.new(nrpe_command, {:stdout => output, :chomp => true})
         shell.runcommand
         exitcode = shell.status.exitstatus
-
         return exitcode, output
       end
 
       def self.plugin_for_command(command)
-        ret = nil
-        fname = nil
+        plugin = Nrpe.all_command_plugins[command]
+        return { :cmd => plugin } if plugin
+        nil
+      end
+
+      def self.all_command_plugins
+        ret = {}
+        files = []
         config = Config.instance
-
         fdir = config.pluginconf["nrpe.conf_dir"] || "/etc/nagios/nrpe.d"
+        if File.directory?(fdir)
+          Dir.glob("#{dir}/*.cfg") do | check |
 
+            if check =~ /([^\/]+)\.cfg/
+              files << check
+            end
+          end
+        end
         if config.pluginconf["nrpe.conf_file"]
-          fname = "#{fdir}/#{config.pluginconf['nrpe.conf_file']}"
-        else
-          fname = "#{fdir}/#{command}.cfg"
+          files << "#{fdir}/#{config.pluginconf['nrpe.conf_file']}"
         end
 
-        if File.exist?(fname)
-          File.readlines(fname).each do |check|
-            check.chomp!
-
-            if check =~ /command\[#{command}\]\s*=\s*(.+)$/
-              ret = {:cmd => $1}
+        files.each do |fname|
+          if File.exist?(fname)
+            File.readlines(fname).each do |check|
+              check.chomp!
+              if check =~ /command\[(.+?)\]\s*=\s*(.+)$/
+                ret[$1] = $2
+              end
             end
           end
         end
 
         ret
       end
+
     end
   end
 end

@@ -85,4 +85,27 @@ describe "nrpe agent" do
       MCollective::Agent::Nrpe.run("foo").should == [3, "No such command: foo"]
     end
   end
+
+  describe "#runallcommands" do
+    let(:config){mock}
+    let(:pluginconf){{"nrpe.conf_dir" => "/foo", "nrpe.conf_file" => "bar.cfg"}}
+
+    before :each do
+      config.stubs(:pluginconf).returns(pluginconf)
+      MCollective::Config.stubs(:instance).returns(config)
+      File.expects(:exist?).with("/foo/bar.cfg").returns(true)
+      File.expects(:readlines).with("/foo/bar.cfg").returns(["command[command]=run"])
+    end
+
+    it "should reply with statusmessage 'OK' of exitcode is 0" do
+      MCollective::Agent::Nrpe.expects(:run).with("command").returns(0)
+      result = @agent.call(:runallcommands, :command => "command")
+      result.should be_successful
+      result.should have_data_items(:commands=>{"command"=>{:exitcode=>0, :output=>nil}})
+      result[:statusmsg].should == "OK"
+      result[:statuscode].should == 0
+    end
+  end
+
 end
+
