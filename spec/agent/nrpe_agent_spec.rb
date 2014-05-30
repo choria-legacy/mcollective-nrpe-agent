@@ -58,6 +58,24 @@ describe "nrpe agent" do
       MCollective::Agent::Nrpe.plugin_for_command("command").should == {:cmd => "run"}
     end
 
+    it "should return the command from nrpe.conf_dir if it is set and nrpe.conf_file is unset" do
+      pluginconf["nrpe.conf_file"] = nil
+      Dir.expects(:glob).with("/foo/*.cfg").returns(["/foo/baz.cfg", "/foo/bar.cfg"])
+      File.expects(:exist?).with("/foo/baz.cfg").returns(true)
+      File.expects(:readlines).with("/foo/baz.cfg").returns(["command[fake_command]=donotrun"])
+      File.expects(:exist?).with("/foo/bar.cfg").returns(true)
+      File.expects(:readlines).with("/foo/bar.cfg").returns(["command[other_fake_command]=donotrun", "command[command]=run"])
+      MCollective::Agent::Nrpe.plugin_for_command("command").should == {:cmd => "run"}
+    end
+
+    it "should return the nil if no matching command is found in nrpe.conf_dir" do
+      pluginconf["nrpe.conf_file"] = nil
+      Dir.expects(:glob).with("/foo/*.cfg").returns(["/foo/bar.cfg"])
+      File.expects(:exist?).with("/foo/bar.cfg").returns(true)
+      File.expects(:readlines).with("/foo/bar.cfg").returns(["command[fake_command]=run"])
+      MCollective::Agent::Nrpe.plugin_for_command("command").should == nil
+    end
+
     it "should return the command from /etc/nagios/nrpe.d if nrpe.conf_dir is unset" do
       pluginconf["nrpe.conf_dir"] = nil
       File.expects(:exist?).with("/etc/nagios/nrpe.d/bar.cfg").returns(true)

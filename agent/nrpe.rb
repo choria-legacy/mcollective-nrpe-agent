@@ -51,7 +51,6 @@ module MCollective
       end
 
       def self.plugin_for_command(command)
-        ret = nil
         fnames = []
         config = Config.instance
 
@@ -74,7 +73,7 @@ module MCollective
             end
           end
         end
-
+        nil
       end
     end
   end
