@@ -51,29 +51,29 @@ module MCollective
       end
 
       def self.plugin_for_command(command)
-        ret = nil
-        fname = nil
+        fnames = []
         config = Config.instance
 
         fdir = config.pluginconf["nrpe.conf_dir"] || "/etc/nagios/nrpe.d"
 
         if config.pluginconf["nrpe.conf_file"]
-          fname = "#{fdir}/#{config.pluginconf['nrpe.conf_file']}"
+          fnames << "#{fdir}/#{config.pluginconf['nrpe.conf_file']}"
         else
-          fname = "#{fdir}/#{command}.cfg"
+          fnames |= Dir.glob("#{fdir}/*.cfg")
         end
 
-        if File.exist?(fname)
-          File.readlines(fname).each do |check|
-            check.chomp!
+        fnames.each do |fname|
+          if File.exist?(fname)
+            File.readlines(fname).each do |check|
+              check.chomp!
 
-            if check =~ /command\[#{command}\]\s*=\s*(.+)$/
-              ret = {:cmd => $1}
+              if check =~ /command\[#{command}\]\s*=\s*(.+)$/
+                return {:cmd => $1}
+              end
             end
           end
         end
-
-        ret
+        nil
       end
     end
   end
