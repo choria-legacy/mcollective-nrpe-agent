@@ -1,0 +1,22 @@
+Source: mcollective-nrpe
+Homepage: https://github.com/puppetlabs/mcollective-nrpe-agent
+Section: utils
+Priority: extra
+Maintainer: Puppet Labs
+Build-Depends: cdbs, debhelper
+Standards-Version: 3.8.0
+
+Package: mcollective-nrpe-agent
+Architecture: all
+Depends: mcollective-nrpe-common(= ${binary:Version})
+Description: Agent to query NRPE commands via MCollective
+
+Package: mcollective-nrpe-client
+Architecture: all
+Depends: mcollective-nrpe-common(= ${binary:Version})
+Description: Agent to query NRPE commands via MCollective
+
+Package: mcollective-nrpe-common
+Architecture: all
+Depends: mcollective-common(>= 2.2.1)
+Description: Agent to query NRPE commands via MCollective

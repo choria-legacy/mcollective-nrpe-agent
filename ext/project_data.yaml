@@ -1,0 +1,18 @@
+---
+project: 'mcollective-nrpe'
+author: 'Puppet Labs'
+email: 'info@puppetlabs.com'
+homepage: 'https://github.com/puppetlabs/mcollective-nrpe-agent'
+summary: 'Agent to query NRPE commands via MCollective'
+description: 'Agent to query NRPE commands via MCollective'
+# files and gem_files are space separated lists
+files:
+  - agent
+  - aggregate
+  - application
+  - data
+  - ext
+# List of packaging related templates to evaluate before the tarball is packed
+templates:
+  - "ext/redhat/mcollective-nrpe.spec.erb"
+  - "ext/debian/changelog.erb"
