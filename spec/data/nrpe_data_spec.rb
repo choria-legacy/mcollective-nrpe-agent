@@ -8,7 +8,8 @@ module MCollective
   module Data
     describe "#query_data" do
       before do
-        @ddl = mock
+        @ddl = mock('ddl')
+        @ddl.stubs(:dataquery_interface).returns({:output => {}})
         @ddl.stubs(:meta).returns({:timeout => 1})
         DDL.stubs(:new).returns(@ddl)
       end
