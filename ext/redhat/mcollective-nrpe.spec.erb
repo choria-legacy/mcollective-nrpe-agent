@@ -1,0 +1,70 @@
+# VERSION is subbed out during rake srpm process
+%global realversion <%= @version %>
+%global rpmversion <%= @rpmversion %>
+
+Summary:   Agent to query NRPE commands via MCollective
+Name:      mcollective-nrpe
+Version:   %{rpmversion}
+Release:   <%= @rpmrelease -%>%{?dist}
+Vendor:    %{?_host_vendor}
+License:   ASL 2.0
+URL:       https://github.com/puppetlabs/mcollective-nrpe-agent
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch: noarch
+Group:     System Tools
+Source0:   mcollective-nrpe-%{realversion}.tar.gz
+
+%description
+Agent to query NRPE commands via MCollective
+
+%prep
+%setup -q  -n %{name}-%{realversion}
+
+%build
+
+%install
+rm -rf %{buildroot}
+%{__install} -d -m0755 %{buildroot}%{_libexecdir}/mcollective/mcollective
+cp -a agent aggregate application data %{buildroot}%{_libexecdir}/mcollective/mcollective
+
+%clean
+rm -rf %{buildroot}
+
+%package agent
+Requires: mcollective-nrpe-common = %{version}-%{release}
+Group: System Tools
+Summary:   Agent to query NRPE commands via MCollective
+
+%package client
+Requires: mcollective-nrpe-common = %{version}-%{release}
+Group: System Tools
+Summary:   Agent to query NRPE commands via MCollective
+
+%package common
+Requires: mcollective-common >= 2.2.1
+Group: System Tools
+Summary:   Agent to query NRPE commands via MCollective
+
+%description agent
+Agent to query NRPE commands via MCollective
+
+%description client
+Agent to query NRPE commands via MCollective
+
+%description common
+Agent to query NRPE commands via MCollective
+
+%files agent
+%{_libexecdir}/mcollective/mcollective/agent/*.rb
+
+%files client
+%{_libexecdir}/mcollective/mcollective/application/*.rb
+%{_libexecdir}/mcollective/mcollective/aggregate/*.rb
+
+%files common
+%{_libexecdir}/mcollective/mcollective/agent/*.ddl
+%{_libexecdir}/mcollective/mcollective/data/*
+
+%changelog
+* <%= Time.now.strftime("%a %b %d %Y") %> Puppet Labs Release <info@puppetlabs.com> -  <%= @rpmversion %>-<%= @rpmrelease %>
+- Build for <%= @version %>
