@@ -43,7 +43,7 @@ module MCollective
         return 3, "No such command: #{command}" unless nrpe_command
 
         output = ""
-        shell = Shell.new(nrpe_command[:cmd], {:stdout => output, :chomp => true})
+        shell = ::MCollective::Shell.new(nrpe_command[:cmd], {:stdout => output, :chomp => true})
         shell.runcommand
         exitcode = shell.status.exitstatus
 
