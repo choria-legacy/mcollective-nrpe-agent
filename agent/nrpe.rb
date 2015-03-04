@@ -3,7 +3,7 @@ module MCollective
     class Nrpe<RPC::Agent
 
       action "runcommand" do
-        reply[:exitcode], reply[:output] = Nrpe.run(request[:command])
+        reply[:exitcode], reply[:output] = Nrpe.run(request[:command], request[:args])
         reply[:command] = request[:command]
 
         case reply[:exitcode]
@@ -37,9 +37,8 @@ module MCollective
       # Example :
       #          plugin.nrpe.conf_dir = /etc/nagios/nrpe
       #          plugin.nrpe.conf_file = checks.nrpe
-      def self.run(command)
-        nrpe_command = Nrpe.plugin_for_command(command)
-
+      def self.run(command, args)
+        nrpe_command = Nrpe.plugin_for_command(command,args)
         return 3, "No such command: #{command}" unless nrpe_command
 
         output = ""
@@ -50,7 +49,7 @@ module MCollective
         return exitcode, output
       end
 
-      def self.plugin_for_command(command)
+      def self.plugin_for_command(command,args)
         fnames = []
         config = Config.instance
 
@@ -68,12 +67,22 @@ module MCollective
               check.chomp!
 
               if check =~ /command\[#{command}\]\s*=\s*(.+)$/
-                return {:cmd => $1}
+                return {:cmd => self.get_command_with_args($1,args)}
               end
             end
           end
         end
         nil
+      end
+
+      def self.get_command_with_args(command, args)
+        arguments = []
+        return command unless args
+        args.split('!').to_enum.with_index.each do |arg, i|
+          arguments.push(["$ARG#{i+1}$","#{arg}"])
+        end
+        arguments.each {|arg| command.gsub!(arg[0], arg[1])}
+        return command
       end
     end
   end
