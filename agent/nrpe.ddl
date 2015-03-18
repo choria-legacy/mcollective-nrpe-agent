@@ -17,6 +17,14 @@ action "runcommand", :description => "Run a NRPE command" do
           :optional    => false,
           :maxlength   => 50
 
+    input :args,
+           :prompt      => "Arguments",
+           :description => "NRPE Command arguments",
+           :type        => :string,
+           :validation  => '.*',
+           :optional    => true,
+           :maxlength   => 50
+
     output :output,
            :description => "Output from the Nagios plugin",
            :display_as  => "Output",

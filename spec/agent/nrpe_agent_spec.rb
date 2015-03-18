@@ -11,7 +11,7 @@ describe "nrpe agent" do
 
   describe "#runcommand" do
     it "should reply with statusmessage 'OK' of exitcode is 0" do
-      MCollective::Agent::Nrpe.expects(:run).with("foo").returns(0)
+      MCollective::Agent::Nrpe.expects(:run).with("foo", []).returns(0)
       result = @agent.call(:runcommand, :command => "foo")
       result.should be_successful
       result.should have_data_items(:exitcode=>0, :perfdata=>"")
@@ -19,7 +19,7 @@ describe "nrpe agent" do
     end
 
     it "should reply with statusmessage 'WARNING' of exitcode is 1" do
-      MCollective::Agent::Nrpe.expects(:run).with("foo").returns(1)
+      MCollective::Agent::Nrpe.expects(:run).with("foo", []).returns(1)
       result = @agent.call(:runcommand, :command => "foo")
       result.should be_aborted_error
       result.should have_data_items(:exitcode=>1, :perfdata=>"")
@@ -27,7 +27,7 @@ describe "nrpe agent" do
     end
 
     it "should reply with statusmessage 'CRITICAL' of exitcode is 2" do
-      MCollective::Agent::Nrpe.expects(:run).with("foo").returns(2)
+      MCollective::Agent::Nrpe.expects(:run).with("foo", []).returns(2)
       result = @agent.call(:runcommand, :command => "foo")
       result.should be_aborted_error
       result.should have_data_items(:exitcode=>2, :perfdata=>"")
@@ -35,11 +35,19 @@ describe "nrpe agent" do
     end
 
     it "should reply with statusmessage UNKNOWN if exitcode is something else" do
-      MCollective::Agent::Nrpe.expects(:run).with("foo")
+      MCollective::Agent::Nrpe.expects(:run).with("foo", [])
       result = @agent.call(:runcommand, :command => "foo")
       result.should be_aborted_error
       result.should have_data_items(:exitcode=>nil, :perfdata=>"")
       result[:statusmsg].should == "UNKNOWN"
+    end
+
+    it "should execute `run` with arguments parsed from :args" do
+      MCollective::Agent::Nrpe.expects(:run).with("foo",["arg1","arg2"]).returns(0)
+      result = @agent.call(:runcommand, :command => "foo", :args => "arg1!arg2")
+      result.should be_successful
+      result.should have_data_items(:exitcode=>0, :perfdata=>"")
+      result[:statusmsg].should == "OK"
     end
   end
 
@@ -55,7 +63,13 @@ describe "nrpe agent" do
     it "should return the command from nrpe.conf_dir if it is set" do
       File.expects(:exist?).with("/foo/bar.cfg").returns(true)
       File.expects(:readlines).with("/foo/bar.cfg").returns(["command[command]=run"])
-      MCollective::Agent::Nrpe.plugin_for_command("command").should == "run"
+      MCollective::Agent::Nrpe.plugin_for_command("command", []).should == "run"
+    end
+
+    it "should return the command from nrpe.conf_dir if it is set with arguments parsed from :args" do
+      File.expects(:exist?).with("/foo/bar.cfg").returns(true)
+      File.expects(:readlines).with("/foo/bar.cfg").returns(["command[command]=run $ARG1$ $ARG2$"])
+      MCollective::Agent::Nrpe.plugin_for_command("command",["60","100"]).should == "run 60 100"
     end
 
     it "should return the command from nrpe.conf_dir if it is set and nrpe.conf_file is unset" do
@@ -65,7 +79,7 @@ describe "nrpe agent" do
       File.expects(:readlines).with("/foo/baz.cfg").returns(["command[fake_command]=donotrun"])
       File.expects(:exist?).with("/foo/bar.cfg").returns(true)
       File.expects(:readlines).with("/foo/bar.cfg").returns(["command[other_fake_command]=donotrun", "command[command]=run"])
-      MCollective::Agent::Nrpe.plugin_for_command("command").should == "run"
+      MCollective::Agent::Nrpe.plugin_for_command("command", []).should == "run"
     end
 
     it "should return the nil if no matching command is found in nrpe.conf_dir" do
@@ -73,14 +87,14 @@ describe "nrpe agent" do
       Dir.expects(:glob).with("/foo/*.cfg").returns(["/foo/bar.cfg"])
       File.expects(:exist?).with("/foo/bar.cfg").returns(true)
       File.expects(:readlines).with("/foo/bar.cfg").returns(["command[fake_command]=run"])
-      MCollective::Agent::Nrpe.plugin_for_command("command").should == nil
+      MCollective::Agent::Nrpe.plugin_for_command("command", []).should == nil
     end
 
     it "should return the command from /etc/nagios/nrpe.d if nrpe.conf_dir is unset" do
       pluginconf["nrpe.conf_dir"] = nil
       File.expects(:exist?).with("/etc/nagios/nrpe.d/bar.cfg").returns(true)
       File.expects(:readlines).with("/etc/nagios/nrpe.d/bar.cfg").returns(["command[command]=run"])
-      MCollective::Agent::Nrpe.plugin_for_command("command").should == "run"
+      MCollective::Agent::Nrpe.plugin_for_command("command", []).should == "run"
     end
   end
 
@@ -89,7 +103,7 @@ describe "nrpe agent" do
       shell = mock
       status = mock
 
-      MCollective::Agent::Nrpe.expects(:plugin_for_command).with("foo").returns({:cmd => "foo"})
+      MCollective::Agent::Nrpe.expects(:plugin_for_command).with("foo", []).returns({:cmd => "foo"})
       MCollective::Shell.stubs(:new).returns(shell)
       shell.expects(:runcommand)
       shell.expects(:status).returns(status)
@@ -99,7 +113,7 @@ describe "nrpe agent" do
     end
 
     it "should return 3 and an error if the command could not be found in #plugin_for_command" do
-      MCollective::Agent::Nrpe.expects(:plugin_for_command).with("foo").returns(nil)
+      MCollective::Agent::Nrpe.expects(:plugin_for_command).with("foo", []).returns(nil)
       MCollective::Agent::Nrpe.run("foo").should == [3, "No such command: foo"]
     end
   end
