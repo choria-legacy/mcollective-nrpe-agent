@@ -56,17 +56,19 @@ module MCollective
         return 3, "No such command: #{command}" unless nrpe_command
 
         output = ""
-        shell = ::MCollective::Shell.new(nrpe_command[:cmd], {:stdout => output, :chomp => true})
+        shell = ::MCollective::Shell.new(nrpe_command, {:stdout => output, :chomp => true})
         shell.runcommand
         exitcode = shell.status.exitstatus
         return exitcode, output
       end
 
       def self.plugin_for_command(command)
-        plugin = Nrpe.all_command_plugins[command]
-        if plugin
-          return { :cmd => plugin }
+        plugins = Nrpe.all_command_plugins
+
+        if plugins.include?(command)
+          return plugins[command]
         end
+
         return nil
       end
 
