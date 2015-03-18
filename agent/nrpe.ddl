@@ -44,3 +44,8 @@ action "runcommand", :description => "Run a NRPE command" do
     end
 end
 
+action "runallcommands", :description => "Run all defined NRPE commands" do
+    output :commands,
+           :description => "Output status of all defined commands",
+           :display_as  => "Commands"
+end

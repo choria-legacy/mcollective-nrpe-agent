@@ -2,6 +2,19 @@ module MCollective
   module Agent
     class Nrpe<RPC::Agent
 
+      action "runallcommands" do
+        reply[:commands] = {}
+        p = Nrpe.all_command_plugins
+        p.each do |name,cmd|
+          exitcode, output = Nrpe.run(name)
+
+          reply[:commands][name] = {
+            :exitcode => exitcode,
+            :output => output,
+          }
+        end
+      end
+
       action "runcommand" do
         reply[:exitcode], reply[:output] = Nrpe.run(request[:command])
         reply[:command] = request[:command]
@@ -43,14 +56,24 @@ module MCollective
         return 3, "No such command: #{command}" unless nrpe_command
 
         output = ""
-        shell = ::MCollective::Shell.new(nrpe_command[:cmd], {:stdout => output, :chomp => true})
+        shell = ::MCollective::Shell.new(nrpe_command, {:stdout => output, :chomp => true})
         shell.runcommand
         exitcode = shell.status.exitstatus
-
         return exitcode, output
       end
 
       def self.plugin_for_command(command)
+        plugins = Nrpe.all_command_plugins
+
+        if plugins.include?(command)
+          return plugins[command]
+        end
+
+        return nil
+      end
+
+      def self.all_command_plugins
+        commands = {}
         fnames = []
         config = Config.instance
 
@@ -67,13 +90,14 @@ module MCollective
             File.readlines(fname).each do |check|
               check.chomp!
 
-              if check =~ /command\[#{command}\]\s*=\s*(.+)$/
-                return {:cmd => $1}
+              if check =~ /^command\[(.+?)\]\s*=\s*(.+)$/
+                commands[$1] = $2
               end
             end
           end
         end
-        nil
+
+        return commands
       end
     end
   end

@@ -55,7 +55,7 @@ describe "nrpe agent" do
     it "should return the command from nrpe.conf_dir if it is set" do
       File.expects(:exist?).with("/foo/bar.cfg").returns(true)
       File.expects(:readlines).with("/foo/bar.cfg").returns(["command[command]=run"])
-      MCollective::Agent::Nrpe.plugin_for_command("command").should == {:cmd => "run"}
+      MCollective::Agent::Nrpe.plugin_for_command("command").should == "run"
     end
 
     it "should return the command from nrpe.conf_dir if it is set and nrpe.conf_file is unset" do
@@ -65,7 +65,7 @@ describe "nrpe agent" do
       File.expects(:readlines).with("/foo/baz.cfg").returns(["command[fake_command]=donotrun"])
       File.expects(:exist?).with("/foo/bar.cfg").returns(true)
       File.expects(:readlines).with("/foo/bar.cfg").returns(["command[other_fake_command]=donotrun", "command[command]=run"])
-      MCollective::Agent::Nrpe.plugin_for_command("command").should == {:cmd => "run"}
+      MCollective::Agent::Nrpe.plugin_for_command("command").should == "run"
     end
 
     it "should return the nil if no matching command is found in nrpe.conf_dir" do
@@ -80,7 +80,7 @@ describe "nrpe agent" do
       pluginconf["nrpe.conf_dir"] = nil
       File.expects(:exist?).with("/etc/nagios/nrpe.d/bar.cfg").returns(true)
       File.expects(:readlines).with("/etc/nagios/nrpe.d/bar.cfg").returns(["command[command]=run"])
-      MCollective::Agent::Nrpe.plugin_for_command("command").should == {:cmd => "run"}
+      MCollective::Agent::Nrpe.plugin_for_command("command").should == "run"
     end
   end
 
@@ -101,6 +101,27 @@ describe "nrpe agent" do
     it "should return 3 and an error if the command could not be found in #plugin_for_command" do
       MCollective::Agent::Nrpe.expects(:plugin_for_command).with("foo").returns(nil)
       MCollective::Agent::Nrpe.run("foo").should == [3, "No such command: foo"]
+    end
+  end
+
+  describe "#runallcommands" do
+    let(:config){mock}
+    let(:pluginconf){{"nrpe.conf_dir" => "/foo", "nrpe.conf_file" => "bar.cfg"}}
+
+    before :each do
+      config.stubs(:pluginconf).returns(pluginconf)
+      MCollective::Config.stubs(:instance).returns(config)
+      File.expects(:exist?).with("/foo/bar.cfg").returns(true)
+      File.expects(:readlines).with("/foo/bar.cfg").returns(["command[command]=run"])
+    end
+
+    it "should reply with statusmessage 'OK' of exitcode is 0" do
+      MCollective::Agent::Nrpe.expects(:run).with("command").returns(0)
+      result = @agent.call(:runallcommands, :command => "command")
+      result.should be_successful
+      result.should have_data_items(:commands=>{"command"=>{:exitcode=>0, :output=>nil}})
+      result[:statusmsg].should == "OK"
+      result[:statuscode].should == 0
     end
   end
 end
