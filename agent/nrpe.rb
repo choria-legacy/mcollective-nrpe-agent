@@ -16,7 +16,8 @@ module MCollective
       end
 
       action "runcommand" do
-        reply[:exitcode], reply[:output] = Nrpe.run(request[:command])
+        args = request[:args].to_s.split('!')
+        reply[:exitcode], reply[:output] = Nrpe.run(request[:command], args)
         reply[:command] = request[:command]
 
         case reply[:exitcode]
@@ -50,8 +51,8 @@ module MCollective
       # Example :
       #          plugin.nrpe.conf_dir = /etc/nagios/nrpe
       #          plugin.nrpe.conf_file = checks.nrpe
-      def self.run(command)
-        nrpe_command = Nrpe.plugin_for_command(command)
+      def self.run(command, args=[])
+        nrpe_command = Nrpe.plugin_for_command(command, args)
 
         return 3, "No such command: #{command}" unless nrpe_command
 
@@ -62,14 +63,22 @@ module MCollective
         return exitcode, output
       end
 
-      def self.plugin_for_command(command)
+      def self.plugin_for_command(command, args)
         plugins = Nrpe.all_command_plugins
 
         if plugins.include?(command)
-          return plugins[command]
+          return self.expand_command_args(plugins[command], args)
         end
 
         return nil
+      end
+
+      def self.expand_command_args(command, args)
+        copy = command.dup # work on a copy to avoid mutating our arguments
+        args.each_with_index do |value, index|
+          copy.gsub!(/\$ARG#{index + 1}\$/, value)
+        end
+        return copy
       end
 
       def self.all_command_plugins
