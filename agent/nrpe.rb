@@ -90,6 +90,8 @@ module MCollective
 
         if config.pluginconf["nrpe.conf_file"]
           fnames << "#{fdir}/#{config.pluginconf['nrpe.conf_file']}"
+        elsif config.pluginconf["nrpe.conf_path"]
+          fnames |= Dir.glob(config.pluginconf["nrpe.conf_path"].split(':').map{|fdir| "#{fdir}/*.cfg"})
         else
           fnames |= Dir.glob("#{fdir}/*.cfg")
         end
