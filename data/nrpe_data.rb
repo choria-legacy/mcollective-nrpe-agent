@@ -6,10 +6,9 @@ module MCollective
       activate_when{ PluginManager["nrpe_agent"] }
 
       query do |command|
-        nrpe_command = Agent::Nrpe.plugin_for_command(command)
+        nrpe_command = Agent::Nrpe.plugin_for_command(command, [])
 
         if nrpe_command
-          nrpe_command = nrpe_command[:cmd]
           Log.debug("Running Nrpe command '#{command}' : '#{nrpe_command}'")
           result[:exitcode], _ = Agent::Nrpe.run(command)
         else
