@@ -134,3 +134,10 @@ dev2.example.com
 
 Finished processing 1 / 1 hosts in 138.15 ms
 ```
+
+## Maintenance
+
+Maintainers: Alessandro Parisi <alessandro@puppet.com>, Michael Smith
+<michael.smith@puppet.com>, Michal Ruzicka <michal.ruzicka@puppet.com>.
+
+Tickets: File bug tickets at https://tickets.puppet.com/browse/MCOP.
