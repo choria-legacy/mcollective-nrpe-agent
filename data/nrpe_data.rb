@@ -6,7 +6,13 @@ module MCollective
       activate_when{ PluginManager["nrpe_agent"] }
 
       query do |command|
-        nrpe_command = Agent::Nrpe.plugin_for_command(command, [])
+        if command =~ / /
+          args = command.split(' ', 2)[1].split('!')
+          command = command.split(' ', 2)[0]
+        else
+          args = []
+        end
+        nrpe_command = Agent::Nrpe.plugin_for_command(command, args)
 
         if nrpe_command
           Log.debug("Running Nrpe command '#{command}' : '#{nrpe_command}'")

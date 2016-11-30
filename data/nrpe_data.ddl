@@ -13,7 +13,7 @@ dataquery :description => "Runs a Nrpe command and returns the exit code" do
           :prompt       => "Command",
           :description  => "Valid Nrpe command",
           :type         => :string,
-          :validation   => '\A[a-zA-Z0-9_-]+\z',
+          :validation   => '\A[a-zA-Z0-9_-]+( .*)?\z',
           :maxlength    => 20
 
   output  :exitcode,

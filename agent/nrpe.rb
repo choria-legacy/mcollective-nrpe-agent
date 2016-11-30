@@ -63,7 +63,7 @@ module MCollective
         return exitcode, output
       end
 
-      def self.plugin_for_command(command, args)
+      def self.plugin_for_command(command, args=[])
         plugins = Nrpe.all_command_plugins
 
         if plugins.include?(command)
