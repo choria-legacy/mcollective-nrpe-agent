@@ -1,4 +1,4 @@
-#MCollective NRPE Agent
+# MCollective NRPE Agent
 
 Often after just doing a change on servers you want to just be sure that they’re all going to pass a certain nagios check.
 
@@ -8,7 +8,7 @@ If you put your nagios checks on your servers using the common Nagios NRPE then 
 
 I wrote a blog post on using this plugin to aggregate checks for Nagios: [Aggregating Nagios Checks With MCollective](http://www.devco.net/archives/2010/07/03/aggregating_nagios_checks_with_mcollective.php)
 
-##Setting up NRPE
+## Setting up NRPE
 This agent makes an assumption or two about how you set up NRPE, in your nrpe.cfg add the following:
 
 ```
@@ -24,14 +24,14 @@ command[check_load]=/usr/lib64/nagios/plugins/check_load -w 1.5,1.5,1.5 -c 2,2,2
 With this setup the agent will now be able to find your check_load command.
 I’ve added a Puppet define and template to help you create checks like this [on GitHub](http://github.com/puppetlabs/mcollective-plugins/tree/master/agent/nrpe/puppet/)
 
-##Agent Installation
+## Agent Installation
 Follow the basic [plugin install guide](http://projects.puppetlabs.com/projects/mcollective-plugins/wiki/InstalingPlugins)
 
-##Agent Configuration
+## Agent Configuration
 You can set the directory where the NRPE cfg files live using plugin.nrpe.conf_dir
 
-##Usage
-###Using generic mco rpc
+## Usage
+### Using generic mco rpc
 You can use the normal mco rpc script to run the agent:
 
 ```
@@ -59,7 +59,7 @@ Summary of Exit Code:
 Finished processing 27 / 27 hosts in 380.57 ms
 ```
 
-###Supplied Client
+### Supplied Client
 Or we provide a client specifically for this agent that is a bit more appropriate for the purpose:
 
 The client by default only shows problems:
@@ -117,7 +117,7 @@ Summary of Exit Code:
       Total Time: 263.76ms
 ```
 
-###Data Plugin
+### Data Plugin
 
 The NRPE Agent ships with a data plugin that will enable you to filter discovery on the results of NRPE commands.
 
