@@ -1,5 +1,13 @@
 # MCollective NRPE Agent
 
+## Deprecation Notice
+
+This repository holds legacy code related to The Marionette Collective project.  That project has been deprecated by Puppet Inc and the code donated to the Choria Project.
+
+Please review the [Choria Project Website](https://choria.io) and specifically the [MCollective Deprecation Notice](https://choria.io/mcollective) for further information and details about the future of the MCollective project.
+
+## Overview
+
 Often after just doing a change on servers you want to just be sure that they’re all going to pass a certain nagios check.
 
 Say you’ve deployed some new code and restarted tomcat, there might be a time while you will experience high loads, you can very quickly determine when all your machines are back to normal using this. It can take nagios many minutes to check all your machines which is a totally unneeded delay in your deployment process.
@@ -134,10 +142,3 @@ dev2.example.com
 
 Finished processing 1 / 1 hosts in 138.15 ms
 ```
-
-## Maintenance
-
-Maintainers: Alessandro Parisi <alessandro@puppet.com>, Michael Smith
-<michael.smith@puppet.com>, Michal Ruzicka <michal.ruzicka@puppet.com>.
-
-Tickets: File bug tickets at https://tickets.puppet.com/browse/MCOP.
